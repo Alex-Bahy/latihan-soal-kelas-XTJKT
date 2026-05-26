@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Quiz – TJKT X | SMK Masohi</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --surface: #141928;
+    --card: #1a2035;
+    --border: #2a3450;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent3: #10b981;
+    --wrong: #ef4444;
+    --text: #e2e8f0;
+    --muted: #7a8aa0;
+    --gold: #fbbf24;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0,229,255,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(124,58,237,0.07) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  .header {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 2.5rem 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .header .badge {
+    display: inline-block;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.3);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    padding: 0.3rem 0.9rem;
+    border-radius: 100px;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .header h1 span { color: var(--accent); }
+  .header p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,15,26,0.92);
+    backdrop-filter: blur(12px);
+    padding: 0.7rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .score-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.25);
+    color: var(--accent);
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  /* CONTAINER */
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 5rem;
+    position: relative;
+    z-index: 5;
+  }
+
+  /* READING PASSAGE */
+  .passage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.75;
+    color: #c2cce0;
+  }
+  .passage .passage-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+  .passage strong { color: var(--text); }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* QUESTION CARD */
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 1.2rem;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+  }
+  .q-card:hover { box-shadow: 0 0 0 1px rgba(0,229,255,0.15), 0 8px 32px rgba(0,0,0,0.3); }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.2rem 1.4rem 1rem;
+  }
+  .q-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent);
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .q-text {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    font-weight: 400;
+  }
+  .q-text em {
+    font-style: italic;
+    color: #a0b4cc;
+    background: rgba(124,58,237,0.1);
+    padding: 0 0.25rem;
+    border-radius: 3px;
+  }
+
+  /* OPTIONS */
+  .q-options {
+    padding: 0 1.4rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    background: rgba(42,52,80,0.4);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text);
+    font-size: 0.87rem;
+    font-family: 'Sora', sans-serif;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .option-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(0,229,255,0.07);
+  }
+  .option-btn:hover:not(:disabled)::before { opacity: 0.04; }
+  .option-btn:disabled { cursor: default; }
+
+  .opt-key {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    background: var(--border);
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  /* States */
+  .option-btn.correct {
+    background: rgba(16,185,129,0.12);
+    border-color: var(--accent3);
+  }
+  .option-btn.correct .opt-key {
+    background: var(--accent3);
+    color: #fff;
+  }
+  .option-btn.wrong {
+    background: rgba(239,68,68,0.1);
+    border-color: var(--wrong);
+  }
+  .option-btn.wrong .opt-key {
+    background: var(--wrong);
+    color: #fff;
+  }
+  .option-btn.revealed-correct {
+    background: rgba(16,185,129,0.07);
+    border-color: rgba(16,185,129,0.4);
+  }
+
+  /* FEEDBACK */
+  .feedback {
+    margin: 0 1.4rem 1.2rem;
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    display: none;
+    animation: feedIn 0.3s ease;
+  }
+  @keyframes feedIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb {
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.25);
+  }
+  .feedback.wrong-fb {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+  .feedback .fb-title {
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-bottom: 0.35rem;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  .feedback.correct-fb .fb-title { color: var(--accent3); }
+  .feedback.wrong-fb .fb-title { color: var(--wrong); }
+  .feedback .fb-id { color: var(--gold); font-weight: 600; }
+  .feedback .fb-exp { color: #c2cce0; }
+
+  /* RESULT SCREEN */
+  #result-screen {
+    display: none;
+    text-align: center;
+    padding: 3rem 1rem;
+    animation: feedIn 0.5s ease;
+  }
+  .result-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 4px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    position: relative;
+    background: var(--surface);
+  }
+  .result-circle::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top-color: var(--accent);
+    border-right-color: var(--accent2);
+    animation: spin 3s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .result-score-num {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .result-score-denom {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .result-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+  .result-sub {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+  .result-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1.4rem;
+    min-width: 90px;
+  }
+  .stat-box .s-num { font-size: 1.5rem; font-weight: 700; }
+  .stat-box .s-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted); margin-top: 0.2rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .stat-box.green .s-num { color: var(--accent3); }
+  .stat-box.red .s-num { color: var(--wrong); }
+  .stat-box.blue .s-num { color: var(--accent); }
+
+  .btn-restart {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.8rem 2rem;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.05em;
+  }
+  .btn-restart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,229,255,0.3);
+  }
+
+  /* NAV */
+  .quiz-nav {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 1.4rem 1.2rem;
+  }
+  .btn-submit-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.65rem 1.6rem;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.05em;
+    margin-top: 1.5rem;
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-submit-all:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(124,58,237,0.35);
+  }
+
+  /* Floating counter */
+  .float-counter {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: rgba(11,15,26,0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0.6rem 1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .float-counter .fc-num {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  @media(max-width: 600px) {
+    .q-header { padding: 1rem; }
+    .q-options { padding: 0 1rem 1rem; }
+    .feedback { margin: 0 1rem 1rem; }
+    .float-counter { bottom: 1rem; right: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="badge">⚡ SMK Masohi – TJKT X – Semester 1 – 2025/2026</span>
+  <h1>English <span>IT Careers</span> Quiz</h1>
+  <p>25 Multiple Choice Questions · Bahasa Indonesia Explanation</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  <span class="progress-label" id="prog-label">0 / 25</span>
+  <span class="score-badge" id="score-badge">Score: 0</span>
+</div>
+
+<div class="container" id="quiz-container">
+  <!-- Questions injected by JS -->
+</div>
+
+<div class="container" id="result-screen">
+  <div class="result-circle">
+    <div class="result-score-num" id="res-score">0</div>
+    <div class="result-score-denom">/ 25</div>
+  </div>
+  <div class="result-title" id="res-title">🎉 Well Done!</div>
+  <div class="result-sub" id="res-sub">Kamu telah menyelesaikan kuis ini.</div>
+  <div class="result-stats">
+    <div class="stat-box green"><div class="s-num" id="res-correct">0</div><div class="s-label">Benar</div></div>
+    <div class="stat-box red"><div class="s-num" id="res-wrong">0</div><div class="s-label">Salah</div></div>
+    <div class="stat-box blue"><div class="s-num" id="res-pct">0%</div><div class="s-label">Nilai</div></div>
+  </div>
+  <button class="btn-restart" onclick="restartQuiz()">↺ &nbsp;Ulangi Kuis</button>
+</div>
+
+<div class="float-counter" id="float-counter">
+  <div class="fc-num" id="fc-answered">0</div>
+  <div>dijawab</div>
+</div>
+
+<script>
+// =============================================
+//  QUIZ DATA – 25 Questions (New, same level)
+// =============================================
+const PASSAGES = {
+  p1: `<span class="passage-label">📖 Reading Text 1 – Questions 1–4</span>
+Meet <strong>Bintang Sahetapy</strong> – Junior Network Technician from Masohi<br><br>
+Bintang Sahetapy is 21 years old. He works as a junior network technician at a telecommunications company called <strong>ConnectMaluku</strong> in Masohi. Bintang completed the TJKT program at <strong>SMK Negeri 3 Maluku Tengah</strong> in 2024. After graduating, he took an online course in network fundamentals to strengthen his skills. Today, he sets up Wi-Fi networks and fixes connection problems for offices and schools across Maluku Tengah. Because most networking guides are written in English, Bintang watches English-language tutorials on YouTube every week. In his free time, he creates short tech-tip videos in Bahasa Indonesia for fellow TJKT graduates. His biggest dream is to build free Wi-Fi access points in remote villages across Maluku.`,
+
+  p2: `<span class="passage-label">📖 Reading Text 2 – Questions 5–6</span>
+Meet <strong>Sinta Wael</strong> – IT Support Specialist from Tual<br><br>
+Sinta Wael, 24, works as an IT support specialist at a government office in Tual. Her main job is to help staff members solve computer and software problems quickly so the office can run without disruption. Sinta studied the TJKT program at SMK Negeri 2 Tual and later earned a helpdesk certification. She says the trickiest part of her job is diagnosing problems she has never seen before. "A good IT support person must listen carefully to the user before touching anything," Sinta explains. She always encourages TJKT students to improve their communication skills, because technology alone is not enough to solve every problem.`,
+
+  p3: `<span class="passage-label">📖 Procedure Text – Questions 18–19</span>
+<strong>How to Restart a Frozen Computer Safely</strong><br>
+1. Press and hold the power button for 5–10 seconds until the screen goes dark.<br>
+2. Wait 30 seconds before turning the computer on again.<br>
+3. Press the power button once to switch the computer back on.<br>
+4. If the problem continues, check that all cables are properly connected.<br>
+5. Run a virus scan to make sure no malware is causing the freeze.<br>
+Now your computer should be working normally again.`,
+
+  p4: `<span class="passage-label">📖 Dialogue – Questions 13–15</span>
+<strong>Technician</strong>&nbsp;: Good morning, IT Help Desk. How may I assist you?<br>
+<strong>Ms. Lerato</strong>&nbsp;: Hello. My screen suddenly went black while I was working. Now it will not turn on.<br>
+<strong>Technician</strong>&nbsp;: I see. Is the laptop plugged in and is the charging light on?<br>
+<strong>Ms. Lerato</strong>&nbsp;: Yes, it is plugged in, but I do not see any charging light.<br>
+<strong>Technician</strong>&nbsp;: The problem may be a faulty charger or a drained battery. Please try a different charger first.<br>
+<strong>Ms. Lerato</strong>&nbsp;: All right. I will borrow one from my colleague. Thank you!`,
+
+  p5: `<span class="passage-label">📖 Recount Text – Questions 20–21</span>
+<strong>My Best Day at the School Computer Lab</strong><br><br>
+Last semester, our TJKT class had a practical session in the school computer lab. We were asked to configure a small local area network (LAN) by ourselves. At first, I was confused because I had only read about it in books. My classmate, Rizky, helped me understand the IP address settings. After two hours of trying and failing, our devices finally communicated with each other. Our teacher, Mr. Fauzan, smiled and said we had done something many first-year students struggled with. That day, I understood that real learning happens when you do things yourself, even if you make mistakes along the way.`,
+
+  p6: `<span class="passage-label">📖 Infographic – Maluku IT Snapshot 2025 – Questions 22–25</span>
+<strong>Top Challenges for IT Workers in Eastern Indonesia:</strong><br>
+• Slow internet infrastructure: 74%<br>
+• Limited local tech training: 65%<br>
+• Lack of English reading skills: 58%<br>
+• Difficulty finding senior mentors: 49%<br><br>
+<strong>Top Motivations to Enter IT:</strong><br>
+• Good salary potential: 80%<br>
+• Remote work possibility: 66%<br>
+• Growing job demand: 71%<br>
+• Passion for technology: 55%<br><br>
+<strong>Bonus Fact:</strong> 8 out of 10 IT companies in eastern Indonesia say graduates who can read English documentation are promoted faster than those who cannot.`
+};
+
+const QUESTIONS = [
+  // Q1–4 Reading Text 1
+  {
+    id: 1, passage: 'p1',
+    text: 'Where does Bintang Sahetapy currently work?',
+    opts: ['A. At a government office in Tual','B. At a digital agency in Ambon','C. At a telecommunications company called ConnectMaluku in Masohi','D. At SMK Negeri 3 Maluku Tengah','E. At an online training center in Jakarta'],
+    ans: 2,
+    fb: `<span class="fb-id">✅ Jawaban: C.</span> <span class="fb-exp">Teks secara eksplisit menyatakan: <em>"He works as a junior network technician at a telecommunications company called ConnectMaluku in Masohi."</em> Ini adalah fakta yang langsung disebutkan (soal level C1 – mengingat).</span>`
+  },
+  {
+    id: 2, passage: 'p1',
+    text: 'Based on the text, where did Bintang complete the TJKT program?',
+    opts: ['A. At an online course platform','B. At SMK Negeri 3 Maluku Tengah','C. At ConnectMaluku\'s training center','D. At a university in Ambon','E. At SMK Negeri 2 Tual'],
+    ans: 1,
+    fb: `<span class="fb-id">✅ Jawaban: B.</span> <span class="fb-exp">Teks menyatakan: <em>"Bintang completed the TJKT program at SMK Negeri 3 Maluku Tengah in 2024."</em> Soal ini menguji kemampuan membaca informasi tersurat (C1).</span>`
+  },
+  {
+    id: 3, passage: 'p1',
+    text: 'What does Bintang do in his free time?',
+    opts: ['A. He repairs broken laptops for customers','B. He teaches at SMK Negeri 3 Maluku Tengah','C. He sells internet packages to remote villages','D. He creates short tech-tip videos in Bahasa Indonesia','E. He designs logos for ConnectMaluku'],
+    ans: 3,
+    fb: `<span class="fb-id">✅ Jawaban: D.</span> <span class="fb-exp">Teks menyatakan: <em>"In his free time, he creates short tech-tip videos in Bahasa Indonesia for fellow TJKT graduates."</em> Ini informasi tersurat tentang kegiatan waktu senggang Bintang (C1).</span>`
+  },
+  {
+    id: 4, passage: 'p1',
+    text: 'What is the MAIN IDEA of Reading Text 1?',
+    opts: ['A. Online courses are more useful than vocational school programs.','B. Remote villages in Maluku do not need Wi-Fi connections.','C. Bintang plans to move to a bigger city to find a better job.','D. A young TJKT graduate built a networking career and dreams of connecting remote communities.','E. Bintang only creates videos and does not do technical work.'],
+    ans: 3,
+    fb: `<span class="fb-id">✅ Jawaban: D.</span> <span class="fb-exp">Gagasan utama teks mencakup perjalanan Bintang dari TJKT hingga karier sebagai teknisi jaringan, serta impiannya membangun Wi-Fi gratis di desa-desa terpencil Maluku. Pilihan D merangkum keseluruhan teks dengan tepat (C2 – memahami).</span>`
+  },
+  // Q5–6 Reading Text 2
+  {
+    id: 5, passage: 'p2',
+    text: 'According to the text, what is Sinta\'s main job?',
+    opts: ['A. To design new software for the government office','B. To train new staff on how to use computers','C. To sell IT equipment to government offices','D. To write technical documentation in English','E. To help staff solve computer and software problems so the office runs without disruption'],
+    ans: 4,
+    fb: `<span class="fb-id">✅ Jawaban: E.</span> <span class="fb-exp">Teks menyatakan: <em>"Her main job is to help staff members solve computer and software problems quickly so the office can run without disruption."</em> Ini merupakan informasi tersurat (C1).</span>`
+  },
+  {
+    id: 6, passage: 'p2',
+    text: 'Sinta says, "A good IT support person must listen carefully to the user before touching anything." What can you INFER is the most important quality for her job?',
+    opts: ['A. A good IT support person must understand users\' problems first, not just rush to fix things technically.','B. A good IT support person must type very fast on the keyboard.','C. A good IT support person must have the most expensive tools.','D. A good IT support person must speak multiple foreign languages.','E. A good IT support person must memorize every manual in English.'],
+    ans: 0,
+    fb: `<span class="fb-id">✅ Jawaban: A.</span> <span class="fb-exp">Pernyataan Sinta menunjukkan bahwa mendengarkan pengguna lebih dahulu sebelum bertindak adalah kunci. Ini menyiratkan bahwa memahami masalah secara komunikatif sama pentingnya dengan kemampuan teknis — kita harus <em>menyimpulkan</em> hal ini (C4 – menganalisis/menyimpulkan).</span>`
+  },
+  // Q7–9 Vocabulary
+  {
+    id: 7, passage: null,
+    text: 'Choose the best meaning of the underlined word.\n"A network technician <em>configures</em> routers and switches to create a stable internet connection."',
+    opts: ['A. A person who breaks machines in a laboratory','B. A person who sets up and adjusts devices so they work correctly together','C. A person who sells routers in a computer shop','D. A person who designs the physical appearance of devices','E. A person who cleans the inside of computers with special tools'],
+    ans: 1,
+    fb: `<span class="fb-id">✅ Jawaban: B.</span> <span class="fb-exp">"Configure" berarti mengatur atau menyesuaikan perangkat agar dapat bekerja dengan benar. Konteks kalimat (routers dan switches untuk menciptakan koneksi internet yang stabil) membantu kita menyimpulkan artinya (C2 – memahami konteks kosakata).</span>`
+  },
+  {
+    id: 8, passage: null,
+    text: 'What does the word <em>"bandwidth"</em> most likely mean?\n"The video call kept freezing because the office had very low bandwidth during peak hours."',
+    opts: ['A. The brightness level of a computer screen','B. The number of employees using a computer at once','C. The capacity of a network to transmit data at a given time','D. The size of a file saved on a hard drive','E. The monthly cost of an internet subscription'],
+    ans: 2,
+    fb: `<span class="fb-id">✅ Jawaban: C.</span> <span class="fb-exp">"Bandwidth" dalam konteks teknologi berarti kapasitas jaringan untuk mentransmisikan data. Konteks kalimat (video call yang terus membeku karena bandwidth rendah) membantu kita menyimpulkan maknanya (C3 – menerapkan pemahaman kosakata).</span>`
+  },
+  {
+    id: 9, passage: null,
+    text: 'What does the word <em>"troubleshoot"</em> mean in this sentence?\n"Before calling the vendor, the technician spent an hour trying to troubleshoot the faulty server."',
+    opts: ['A. To replace old equipment with a newer model','B. To contact the vendor immediately for help','C. To report the problem to the manager in writing','D. To find and fix the cause of a technical problem','E. To shut down the server permanently'],
+    ans: 3,
+    fb: `<span class="fb-id">✅ Jawaban: D.</span> <span class="fb-exp">"Troubleshoot" artinya mencari dan memperbaiki penyebab masalah teknis. Konteks kalimat — teknisi melakukan ini <em>sebelum</em> menghubungi vendor — menunjukkan bahwa ini adalah proses investigasi mandiri (C3).</span>`
+  },
+  // Q10–12 Grammar
+  {
+    id: 10, passage: null,
+    text: 'Choose the correct verb to complete the sentence.\n"A cloud engineer ___ large amounts of data across virtual servers every day."',
+    opts: ['A. manage','B. managing','C. to manage','D. managed','E. manages'],
+    ans: 4,
+    fb: `<span class="fb-id">✅ Jawaban: E.</span> <span class="fb-exp">Subjek "A cloud engineer" adalah orang ketiga tunggal (singular). Dalam Simple Present Tense, kata kerja untuk subjek orang ketiga tunggal harus ditambah -s/es. Jadi, "manage" → "manages" (C3 – menerapkan tata bahasa).</span>`
+  },
+  {
+    id: 11, passage: null,
+    text: 'Choose the correct comparative form.\n"A fiber-optic cable is usually ___ than a copper cable for transmitting data."',
+    opts: ['A. more reliable','B. reliable','C. most reliable','D. reliablest','E. more reliably'],
+    ans: 0,
+    fb: `<span class="fb-id">✅ Jawaban: A.</span> <span class="fb-exp">"Reliable" adalah kata sifat panjang (lebih dari dua suku kata), sehingga bentuk komparatifnya menggunakan "more" + kata sifat → "more reliable". Tidak menggunakan -er karena kata ini terlalu panjang (C3 – tata bahasa komparatif).</span>`
+  },
+  {
+    id: 12, passage: null,
+    text: 'Choose the correct verb form.\n"Last night, the IT team ___ a critical software update on all office computers."',
+    opts: ['A. install','B. installs','C. installing','D. installed','E. will install'],
+    ans: 3,
+    fb: `<span class="fb-id">✅ Jawaban: D.</span> <span class="fb-exp">Kata "Last night" menunjukkan waktu lampau (past time). Oleh karena itu, kata kerja harus dalam bentuk Simple Past Tense → "installed". Pilihan lain tidak sesuai dengan konteks waktu lampau (C3 – tata bahasa Simple Past).</span>`
+  },
+  // Q13–15 Dialogue
+  {
+    id: 13, passage: 'p4',
+    text: 'What is Ms. Lerato\'s problem?',
+    opts: ['A. Her printer is making unusual noise.','B. Her internet connection dropped suddenly.','C. Her laptop screen went black and the device will not turn on.','D. Her keyboard stopped responding to inputs.','E. Her email account has been blocked.'],
+    ans: 2,
+    fb: `<span class="fb-id">✅ Jawaban: C.</span> <span class="fb-exp">Ms. Lerato mengatakan: <em>"My screen suddenly went black while I was working. Now it will not turn on."</em> Ini merupakan informasi tersurat tentang masalah yang ia alami (C1).</span>`
+  },
+  {
+    id: 14, passage: 'p4',
+    text: 'What is the MAIN PURPOSE of the dialogue?',
+    opts: ['A. To compare prices of different laptop brands','B. To order a replacement charger from a supplier','C. To discuss how to upgrade a laptop\'s battery','D. To ask for and receive technical help in solving a device problem','E. To complain about the quality of the IT department\'s service'],
+    ans: 3,
+    fb: `<span class="fb-id">✅ Jawaban: D.</span> <span class="fb-exp">Dialog ini menunjukkan pola klasik percakapan helpdesk: pengguna melaporkan masalah, dan teknisi memberikan solusi. Tujuan utama percakapan ini adalah meminta dan menerima bantuan teknis (C2 – memahami tujuan teks).</span>`
+  },
+  {
+    id: 15, passage: 'p4',
+    text: 'Based on the dialogue, what can you INFER about the likely cause of Ms. Lerato\'s problem?',
+    opts: ['A. The laptop is too old and needs to be replaced.','B. A software virus deleted all system files.','C. The office Wi-Fi was turned off.','D. The laptop screen was physically damaged.','E. A faulty charger or drained battery is the most likely cause of the black screen.'],
+    ans: 4,
+    fb: `<span class="fb-id">✅ Jawaban: E.</span> <span class="fb-exp">Teknisi menyimpulkan: <em>"The problem may be a faulty charger or a drained battery."</em> Tidak ada lampu pengisian daya menyala meskipun laptop sudah dicolokkan, sehingga kita bisa <em>menyimpulkan</em> bahwa charger atau baterai yang bermasalah adalah penyebab paling logis (C4 – menyimpulkan).</span>`
+  },
+  // Q16–17 Notice
+  {
+    id: 16, passage: null,
+    text: 'Read the following notice carefully.\n\n📢 NOTICE: The school\'s computer lab will be CLOSED on Monday, 9 June 2025, for scheduled server maintenance. Students who need to submit assignments online should use the library\'s computer terminals or their personal devices. For assistance, contact Mr. Bahtiar in Room 12.\n\nWhere can students submit their assignments if the lab is closed?',
+    opts: ['A. In Mr. Bahtiar\'s room (Room 12)','B. At the school canteen\'s Wi-Fi zone','C. At the main school office','D. In the library using computer terminals or their personal devices','E. They cannot submit; all deadlines are moved to Tuesday'],
+    ans: 3,
+    fb: `<span class="fb-id">✅ Jawaban: D.</span> <span class="fb-exp">Pengumuman menyatakan: <em>"Students who need to submit assignments online should use the library's computer terminals or their personal devices."</em> Ini adalah informasi tersurat dari teks pengumuman (C1).</span>`
+  },
+  {
+    id: 17, passage: null,
+    text: '(Continuing from the same notice above)\nWho should students contact if they need help during the lab closure?',
+    opts: ['A. The school principal','B. Their homeroom teacher','C. Mr. Bahtiar in Room 12','D. The library assistant','E. The IT vendor company'],
+    ans: 2,
+    fb: `<span class="fb-id">✅ Jawaban: C.</span> <span class="fb-exp">Pengumuman menyatakan: <em>"For assistance, contact Mr. Bahtiar in Room 12."</em> Informasi ini tersurat langsung dalam teks pengumuman (C1).</span>`
+  },
+  // Q18–19 Procedure
+  {
+    id: 18, passage: 'p3',
+    text: 'What is the FIRST step to restart a frozen computer safely?',
+    opts: ['A. Run a virus scan immediately','B. Check that all cables are properly connected','C. Press the power button once to turn the computer back on','D. Wait 30 seconds before restarting','E. Press and hold the power button for 5–10 seconds until the screen goes dark'],
+    ans: 4,
+    fb: `<span class="fb-id">✅ Jawaban: E.</span> <span class="fb-exp">Langkah 1 dalam prosedur adalah: <em>"Press and hold the power button for 5–10 seconds until the screen goes dark."</em> Soal ini menguji pemahaman urutan langkah prosedur (C1/C2).</span>`
+  },
+  {
+    id: 19, passage: 'p3',
+    text: 'What should you do RIGHT AFTER pressing the power button to turn the computer back on (Step 3)?',
+    opts: ['A. Hold the power button again for 10 seconds','B. There is no next step; the procedure is complete after Step 3 only if the problem is gone','C. Immediately check that all cables are connected','D. Run a virus scan right away before doing anything else','E. If the problem continues, check that all cables are properly connected'],
+    ans: 4,
+    fb: `<span class="fb-id">✅ Jawaban: E.</span> <span class="fb-exp">Setelah langkah 3 (menyalakan kembali komputer), langkah 4 menyatakan: <em>"If the problem continues, check that all cables are properly connected."</em> Soal ini menguji kemampuan memahami urutan prosedur (C2/C3).</span>`
+  },
+  // Q20–21 Recount
+  {
+    id: 20, passage: 'p5',
+    text: 'What did the writer do on the practical session day?',
+    opts: ['A. Installed new software on the school\'s server','B. Configured a small local area network (LAN) by themselves with classmates','C. Repaired a student\'s broken laptop','D. Designed a school website for Mr. Fauzan','E. Watched tutorial videos about networking all day'],
+    ans: 1,
+    fb: `<span class="fb-id">✅ Jawaban: B.</span> <span class="fb-exp">Teks menyatakan: <em>"We were asked to configure a small local area network (LAN) by ourselves."</em> Ini adalah kegiatan utama yang dilakukan penulis pada hari tersebut (C1).</span>`
+  },
+  {
+    id: 21, passage: 'p5',
+    text: 'What can you INFER about the writer based on the recount text?',
+    opts: ['A. The writer believes that making mistakes while practising is a natural and valuable part of learning.','B. The writer found the session boring and unhelpful.','C. The writer already understood LAN configuration perfectly before the class.','D. The writer thinks classmates should not help each other during practicals.','E. The writer wants to avoid hands-on lessons in the future.'],
+    ans: 0,
+    fb: `<span class="fb-id">✅ Jawaban: A.</span> <span class="fb-exp">Penulis menyatakan di akhir teks: <em>"real learning happens when you do things yourself, even if you make mistakes along the way."</em> Kita dapat <em>menyimpulkan</em> bahwa penulis percaya proses trial-and-error adalah bagian penting dari belajar (C4 – menyimpulkan).</span>`
+  },
+  // Q22–25 Infographic
+  {
+    id: 22, passage: 'p6',
+    text: 'According to the infographic, which challenge is the MOST COMMON for IT workers in eastern Indonesia?',
+    opts: ['A. Lack of English reading skills (58%)','B. Difficulty finding senior mentors (49%)','C. Slow internet infrastructure (74%)','D. Limited local tech training (65%)','E. Low salary potential'],
+    ans: 2,
+    fb: `<span class="fb-id">✅ Jawaban: C.</span> <span class="fb-exp">Berdasarkan infografis, "Slow internet infrastructure" memiliki persentase tertinggi (74%) di antara semua tantangan yang disebutkan. Ini adalah soal membaca data secara langsung (C2 – memahami/C3 – menerapkan).</span>`
+  },
+  {
+    id: 23, passage: 'p6',
+    text: 'Based on the "Top Motivations" data, what can you ANALYZE about why young people choose IT careers in eastern Indonesia?',
+    opts: ['A. Most young people enter IT only because they were forced by their parents.','B. Passion for technology is the number one motivator above salary.','C. Good salary potential and growing job demand are the two strongest motivations, together outweighing other factors.','D. Remote work possibility is less important than all other motivations.','E. Young people in eastern Indonesia do not consider salary when choosing a career.'],
+    ans: 2,
+    fb: `<span class="fb-id">✅ Jawaban: C.</span> <span class="fb-exp">Dua motivasi tertinggi adalah "Good salary potential" (80%) dan "Growing job demand" (71%). Keduanya memiliki persentase tertinggi dan secara bersama-sama dominan dibandingkan faktor lain. Ini menunjukkan motivasi ekonomi dan prospek karier yang kuat (C4 – menganalisis).</span>`
+  },
+  {
+    id: 24, passage: 'p6',
+    text: 'Connect Bintang Sahetapy\'s profile with the infographic. Which connection between Bintang\'s situation and the infographic data is MOST ACCURATE?',
+    opts: ['A. Bintang is not affected by any of the challenges listed in the infographic.','B. Bintang faces the "lack of English reading skills" challenge because he never reads English content.','C. Bintang\'s dream of building village Wi-Fi directly addresses the "slow internet infrastructure" challenge (74%) in the data.','D. Bintang earns the highest salary category shown in the infographic.','E. Bintang\'s career matches the "difficulty finding senior mentors" challenge only.'],
+    ans: 2,
+    fb: `<span class="fb-id">✅ Jawaban: C.</span> <span class="fb-exp">Impian Bintang membangun Wi-Fi gratis di desa-desa terpencil Maluku secara langsung merespons tantangan terbesar (74%) yang disebutkan dalam infografis, yaitu infrastruktur internet yang lambat. Ini menunjukkan kemampuan menghubungkan dua sumber teks (C4 – menganalisis/mensintesis).</span>`
+  },
+  {
+    id: 25, passage: 'p6',
+    text: 'Considering ALL the texts and the infographic, which statement BEST captures the overall message for TJKT students in Maluku?',
+    opts: ['A. IT careers in Maluku are impossible without moving to a big city first.','B. Technical skills are the only thing TJKT students need to succeed in IT.','C. The challenges in eastern Indonesia — such as slow internet and limited training — make IT careers not worth pursuing.','D. TJKT students who build technical skills, communicate well, and develop English literacy will have strong advantages in the growing IT job market of eastern Indonesia.','E. English is unimportant because most IT jobs in Maluku use Bahasa Indonesia only.'],
+    ans: 3,
+    fb: `<span class="fb-id">✅ Jawaban: D.</span> <span class="fb-exp">Semua teks (profil Bintang dan Sinta, dialog, recount, infografis) secara konsisten menunjukkan bahwa kombinasi antara keterampilan teknis, kemampuan komunikasi, literasi bahasa Inggris, dan praktik langsung akan memberikan keunggulan nyata bagi siswa TJKT di pasar kerja IT yang berkembang di Indonesia Timur (C5 – mengevaluasi/mensintesis).</span>`
+  }
+];
+
+// =============================================
+//  STATE
+// =============================================
+let answers = new Array(25).fill(null); // null = unanswered
+let score = 0;
+let answered = 0;
+
+// =============================================
+//  BUILD UI
+// =============================================
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = '';
+
+  let lastPassage = null;
+  QUESTIONS.forEach((q, idx) => {
+    // Passage block
+    if (q.passage && q.passage !== lastPassage) {
+      const pb = document.createElement('div');
+      pb.className = 'passage';
+      pb.innerHTML = PASSAGES[q.passage];
+      container.appendChild(pb);
+      lastPassage = q.passage;
+    } else if (!q.passage) {
+      lastPassage = null;
+    }
+
+    // Card
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `q-card-${idx}`;
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'q-header';
+    header.innerHTML = `<span class="q-num">Q${q.id}</span><div class="q-text">${q.text.replace(/\n/g,'<br>')}</div>`;
+    card.appendChild(header);
+
+    // Options
+    const opts = document.createElement('div');
+    opts.className = 'q-options';
+    q.opts.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.dataset.qi = idx;
+      btn.dataset.oi = oi;
+      const keys = ['A','B','C','D','E'];
+      btn.innerHTML = `<span class="opt-key">${keys[oi]}</span><span>${opt.substring(3)}</span>`;
+      btn.addEventListener('click', () => handleAnswer(idx, oi, btn));
+      opts.appendChild(btn);
+    });
+    card.appendChild(opts);
+
+    // Feedback
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    fb.id = `fb-${idx}`;
+    card.appendChild(fb);
+
+    container.appendChild(card);
+  });
+
+  // Submit button
+  const submitBtn = document.createElement('button');
+  submitBtn.className = 'btn-submit-all';
+  submitBtn.textContent = '🎯  Lihat Hasil Akhir';
+  submitBtn.id = 'submit-btn';
+  submitBtn.addEventListener('click', showResult);
+  container.appendChild(submitBtn);
+
+  updateProgress();
+}
+
+// =============================================
+//  HANDLE ANSWER
+// =============================================
+function handleAnswer(qi, oi, btn) {
+  if (answers[qi] !== null) return; // already answered
+
+  const q = QUESTIONS[qi];
+  const card = document.getElementById(`q-card-${qi}`);
+  const allBtns = card.querySelectorAll('.option-btn');
+  const fb = document.getElementById(`fb-${qi}`);
+
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = (oi === q.ans);
+  answers[qi] = oi;
+  answered++;
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++;
+    fb.className = 'feedback correct-fb show';
+    fb.innerHTML = `<div class="fb-title">✅ BENAR!</div><div>${q.fb}</div>`;
+  } else {
+    btn.classList.add('wrong');
+    allBtns[q.ans].classList.add('revealed-correct');
+    fb.className = 'feedback wrong-fb show';
+    fb.innerHTML = `<div class="fb-title">❌ SALAH</div><div>${q.fb}</div>`;
+  }
+
+  updateProgress();
+  scrollToNext(qi);
+}
+
+function scrollToNext(qi) {
+  if (qi < QUESTIONS.length - 1) {
+    setTimeout(() => {
+      const next = document.getElementById(`q-card-${qi+1}`);
+      if (next) next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 500);
+  }
+}
+
+// =============================================
+//  PROGRESS
+// =============================================
+function updateProgress() {
+  const pct = Math.round((answered / 25) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `${answered} / 25`;
+  document.getElementById('score-badge').textContent = `Score: ${score}`;
+  document.getElementById('fc-answered').textContent = answered;
+}
+
+// =============================================
+//  RESULT
+// =============================================
+function showResult() {
+  document.getElementById('quiz-container').style.display = 'none';
+  document.getElementById('float-counter').style.display = 'none';
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+
+  const pct = Math.round((score / 25) * 100);
+  document.getElementById('res-score').textContent = score;
+  document.getElementById('res-correct').textContent = score;
+  document.getElementById('res-wrong').textContent = 25 - score;
+  document.getElementById('res-pct').textContent = pct + '%';
+
+  let title, sub;
+  if (pct >= 88) { title = '🏆 Luar Biasa!'; sub = 'Nilai sempurna! Kamu siap untuk dunia IT.'; }
+  else if (pct >= 72) { title = '🎉 Bagus Sekali!'; sub = 'Pemahaman yang kuat. Terus tingkatkan!'; }
+  else if (pct >= 56) { title = '💪 Cukup Baik!'; sub = 'Kamu di jalur yang benar. Ulangi materi yang salah.'; }
+  else { title = '📚 Perlu Belajar Lagi'; sub = 'Jangan menyerah! Baca teks kembali dan coba lagi.'; }
+
+  document.getElementById('res-title').textContent = title;
+  document.getElementById('res-sub').textContent = sub;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =============================================
+//  RESTART
+// =============================================
+function restartQuiz() {
+  answers = new Array(25).fill(null);
+  score = 0;
+  answered = 0;
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('float-counter').style.display = 'flex';
+  document.getElementById('quiz-container').style.display = 'block';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// =============================================
+//  INIT
+// =============================================
+buildQuiz();
+</script>
+</body>
+</html>
